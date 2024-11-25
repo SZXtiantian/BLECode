@@ -7,6 +7,7 @@
 # coding:UTF-8
 import asyncio
 import csv
+import os
 import threading
 import time
 
@@ -43,8 +44,17 @@ class DeviceModel:
         sanitized_address = self.BLEDevice.address.replace(":", "_")
         # 生成文件名，包含MAC地址和起始时间戳
         start_timestamp = int(time.time() * 1000)
-        self.filename = f"{sanitized_address}_{start_timestamp}.csv"
+        # 检查IMU文件夹是否存在，不存在则创建
+        folder_path = "IMU"
+        if not os.path.exists(folder_path):
+            os.makedirs(folder_path)
 
+        # 创建以MAC地址命名的文件夹
+        mac_folder_path = os.path.join(folder_path, sanitized_address)
+        if not os.path.exists(mac_folder_path):
+            os.makedirs(mac_folder_path)
+
+        self.filename = f"{mac_folder_path}/{start_timestamp}.csv"
         self.deviceDataBuffer = []  # 数据缓冲区
         self.buffer_lock = threading.Lock()  # 锁，确保线程安全
         self.isWriting = True  # 控制写入线程的运行
